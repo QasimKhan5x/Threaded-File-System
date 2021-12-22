@@ -24,6 +24,10 @@ def thread_runner(outfile, fs, commands):
             fname = tokens[-1]
             fs.delete(fname)
             print2file(fs, outfile)
+        elif command.startswith('mkdir'):
+            dirname = tokens[-1]
+            fs.mkdir(dirname)
+            print2file(fs, outfile)
         elif command.startswith('chdir'):
             dirname = tokens[-1]
             fs.chdir(dirname)
