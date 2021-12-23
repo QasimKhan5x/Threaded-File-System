@@ -53,6 +53,8 @@ def thread_runner(outfile, fs, commands):
                 continue
             if mode == 'w':
                 # file is locked for modification
+                # BUG 
+                # if th1 writing to f1, th2 cannot write to f2
                 with lock:
                     file = fs.open(fname)
                     if file:
