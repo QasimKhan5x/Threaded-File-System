@@ -3,9 +3,20 @@ import os
 from contextlib import redirect_stdout
 from pathlib import Path
 
-# General Utilities
-
+# file/directory separator for cross-platform usability
 SEP = os.path.sep
+'''
+Global File Table that keeps track of which threads have opened what file and in which mode
+Structure:
+{
+    filename:
+    {
+        thread_id: mode
+    }
+}
+For every file, only 1 thread can open a file in w mode at one time
+'''
+global_file_table = dict()
 
 
 def get_name(path):
@@ -24,7 +35,8 @@ def get_parent(path):
 
 
 def print2file(fs, fn):
-    '''fs -> FileSystem object
+    '''
+    fs -> FileSystem object
     fn -> file name
     '''
     with open(fn, 'a') as f:
@@ -34,7 +46,8 @@ def print2file(fs, fn):
 
 
 def showmm2file(fs, fn):
-    '''fs -> FileSystem object
+    '''
+    fs -> FileSystem object
     fn -> file name
     '''
     with open(fn, 'a') as f:
@@ -49,7 +62,45 @@ def write2file(fn, txt):
         with redirect_stdout(f):
             print(txt)
 
-# File Writing Utilities
+
+def is_file_open(fname, thread_id, cache):
+    if fname not in cache:
+        return False
+    if fname not in global_file_table:
+        return False
+    return thread_id in global_file_table[fname]
+
+
+def can_write_to_file(fname, thread_id):
+    '''
+    Must always be preceded by is_file_open()
+    Otherwise, it can throw a KeyError
+    '''
+    return global_file_table[fname][thread_id] == 'w'
+
+
+def can_read_file(fname, thread_id):
+    return global_file_table[fname][thread_id] == 'r'
+
+
+def assert_file_availability(fname, thread_id, cache, outfile, permission):
+    # checks if a file is open / exists
+    # checks if thread has a permission
+    # writes error message in case checks fail
+    if not is_file_open(fname, thread_id, cache):
+        write2file(outfile, f"{fname} is not open / doesn't exist")
+        return False
+    if permission == 'r':
+        if not can_read_file(fname, thread_id):
+            write2file(
+                outfile, f"Thread does not have reading permission for {fname}")
+            return False
+    if permission == 'w':
+        if not can_write_to_file(fname, thread_id):
+            write2file(
+                outfile, f"Thread does not have writing permission for {fname}")
+            return False
+    return True
 
 
 def append(content, text):

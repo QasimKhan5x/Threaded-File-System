@@ -31,36 +31,6 @@ class FileSystem:
         # free frames list; 0 -> free / 1 -> occupied
         self.free_frames = [0] * 10000
 
-    def create(self, fname):
-        '''
-        Get filename, directory of parent, and full_path
-        Ignore operation if directory of parent does not exist or file already exists
-        Create File object and then add to tree
-        '''
-        filename, dirname, full_path = self._get_components(fname)
-        if not self._exists(dirname):
-            print("No such directory exists!")
-            return False
-        if self._exists(full_path):
-            print("Duplicate file. Operation ignored.")
-            return False
-        file = File(filename, dirname)
-        self.fs.create_node(filename, full_path, parent=dirname, data=file)
-        self._allocate_pages(file)
-        return full_path
-
-    def delete(self, fname):
-        '''
-        Check if file doesn't exist
-        Otherwise delete it
-        '''
-        _, _, full_path = self._get_components(fname)
-        if not self._exists(full_path):
-            print("No such file exists!")
-            return False
-        self.fs.remove_node(full_path)
-        return True
-
     def mkdir(self, dirname):
         '''
         Ignore duplicate directory
@@ -69,10 +39,10 @@ class FileSystem:
         dirname, dirpath, full_path = self._get_components(dirname)
         if self._exists(full_path):
             print("Duplicate directory. Operation ignored.")
-            return False
+            return 0
         if not self._exists(dirpath):
             print("No such parent directory exists!")
-            return False
+            return 1
         directory = Directory(dirname, dirpath)
         self.fs.create_node(dirname, full_path, parent=dirpath, data=directory)
         return full_path
@@ -86,6 +56,8 @@ class FileSystem:
         _, _, full_path = self._get_components(dirname)
         if self._exists(full_path):
             self.curr_pointer = self.fs.get_node(full_path).data
+        else:
+            return 0
         return self.pwd()
 
     def mv(self, src_fname, dst_fname):
@@ -95,10 +67,10 @@ class FileSystem:
             dst_fname)
         if not self._exists(src_full_path):
             print("Source file doesn't exist!")
-            return False
+            return 0
         if not self._exists(dst_dirname):
             print("Destination directory doesn't exist!")
-            return False
+            return 1
 
         # we will overwrite destination file
         # so delete it for now
@@ -112,35 +84,6 @@ class FileSystem:
         self.fs.move_node(src_full_path, dst_dirname)
         self.fs.update_node(src_full_path, tag=dst_filename,
                             identifier=dst_full_path)
-        return True
-
-    def open(self, fname):
-        _, _, full_path = self._get_components(fname)
-        if not self._exists(full_path):
-            print("File doesn't exist!")
-            return False
-        file = self.fs.get_node(full_path).data
-        return file
-
-    def close(self, fname, new_contents):
-        '''
-        If the contents of the file changed, 
-        then save the new contents in 'new_contents'
-        It is assumed that file hasn't changed if old_contents == new_contents
-        Modify the page table/free frame list
-        '''
-        _, _, full_path = self._get_components(fname)
-        if not self._exists(full_path):
-            print("File doesn't exist!")
-            return False
-        file = self.fs.get_node(full_path).data
-        old_contents = file.get_contents()
-        if new_contents != old_contents:
-            if self._are_frames_available(file, new_contents):
-                file.set_contents(new_contents)
-                self._allocate_pages(file)
-            else:
-                print("Not enough frames available to save this change.")
         return True
 
     def pwd(self):
@@ -166,6 +109,66 @@ class FileSystem:
     def save(self, name):
         with open(name, "wb") as outp:
             pickle.dump(self, outp, pickle.HIGHEST_PROTOCOL)
+
+    def create(self, fname):
+        '''
+        Get filename, directory of parent, and full_path
+        Ignore operation if directory of parent does not exist or file already exists
+        Create File object and then add to tree
+        '''
+        filename, dirname, full_path = self._get_components(fname)
+        if not self._exists(dirname):
+            print("No such directory exists!")
+            return 0
+        if self._exists(full_path):
+            print("Duplicate file. Operation ignored.")
+            return 1
+        file = File(filename, dirname)
+        self.fs.create_node(filename, full_path, parent=dirname, data=file)
+        self._allocate_pages(file)
+        return full_path
+
+    def delete(self, fname):
+        '''
+        Check if file doesn't exist
+        Otherwise delete it
+        '''
+        _, _, full_path = self._get_components(fname)
+        if not self._exists(full_path):
+            print("No such file exists!")
+            return False
+        self.fs.remove_node(full_path)
+        return True
+
+    def open(self, fname):
+        _, _, full_path = self._get_components(fname)
+        if not self._exists(full_path):
+            print("File doesn't exist!")
+            return False
+        file = self.fs.get_node(full_path).data
+        return file
+
+    def close(self, fname, new_contents):
+        '''
+        If the contents of the file changed, 
+        then save the new contents in 'new_contents'
+        It is assumed that file hasn't changed if old_contents == new_contents
+        Modify the page table/free frame list
+        '''
+        _, _, full_path = self._get_components(fname)
+        if not self._exists(full_path):
+            print("File doesn't exist!")
+            return 0
+        file = self.fs.get_node(full_path).data
+        old_contents = file.get_contents()
+        if new_contents != old_contents:
+            if self._are_frames_available(file, new_contents):
+                file.set_contents(new_contents)
+                self._allocate_pages(file)
+            else:
+                print("Not enough frames available to save this change.")
+                return 1
+        return True
 
     def _exists(self, path):
         '''
@@ -252,3 +255,5 @@ class FileSystem:
 
 if __name__ == '__main__':
     fs = FileSystem()
+    fs.create("file1.txt")
+    fs.print()

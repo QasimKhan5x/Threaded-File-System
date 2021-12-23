@@ -30,6 +30,7 @@ for input_file in files:
         commands = [command.strip() for command in commands]
     commands_per_file.append(commands)
 
-args = tuple(zip(outfiles, fs_duplicated, commands_per_file))
+args = tuple(zip(range(len(files)), outfiles,
+             fs_duplicated, commands_per_file))
 with ThreadPoolExecutor(max_workers=len(files)) as executor:
     executor.map(lambda p: thread_runner(*p), args)
