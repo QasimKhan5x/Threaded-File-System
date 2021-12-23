@@ -10,4 +10,7 @@ close file1.txt
 open file2.txt r
 read file2.txt
 close file2.txt
+open file1.txt r
+read file1.txt
+close file1.txt
 show_memory_map

@@ -1,0 +1,34 @@
+/
+├── file1.txt
+└── file2.txt
+
+
+/file1.txt [0] 49
+/file2.txt [1] 49
+
+file1.txt opened for writing
+/file1.txt [0] 49
+/file2.txt [1] 49
+
+Append text abcd to file1.txt committed as transaction.
+/file1.txt [0] 49
+/file2.txt [1] 49
+
+Duplicate file. Operation ignored.
+file2.txt opened for writing
+/file1.txt [0] 49
+/file2.txt [1] 59
+
+Append text 123 to file2.txt committed as transaction.
+Append text xyz to file1.txt committed as transaction.
+file1.txt has been closed and any changes made were saved.
+file2.txt has been closed and any changes made were saved.
+/file1.txt [0] 56
+/file2.txt [1] 62
+
+file1.txt opened for reading
+file2.txt opened for reading
+Contents of file1.txt: abcdxyz
+Contents of file2.txt: helloworld123
+file1.txt has been closed and any changes made were saved.
+file2.txt has been closed and any changes made were saved.

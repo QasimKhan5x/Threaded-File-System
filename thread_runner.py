@@ -14,6 +14,7 @@ def thread_runner(name, outfile, fs, commands):
     # and the current contents (possibly modified in w mode)
     cache = {}
     for command in commands:
+        print(name, command)
         tokens = command.split()
         # File System and Directory related Commands
         if command.startswith('mkdir'):
@@ -102,10 +103,13 @@ def thread_runner(name, outfile, fs, commands):
                     Wait until that thread closes the file
                 '''
                 if mode == 'w':
+                    print(thread_id, global_file_table)
                     while 'w' in global_file_table[fname].values():
-                        continue
+                        pass
                 # add this thread to the list of threads who have opened this file
+                print(thread_id, global_file_table)
                 global_file_table[fname][thread_id] = mode
+                print(thread_id, global_file_table)
             else:
                 global_file_table[fname] = {thread_id: mode}
             cache[fname] = (file, file.get_contents())
@@ -135,7 +139,8 @@ def thread_runner(name, outfile, fs, commands):
             del global_file_table[fname][thread_id]
             # remove this file from GFT if no threads have opened it
             if len(global_file_table[fname]) == 0:
-                del global_file_table[fname]
+                pass
+                #del global_file_table[fname]
             # python thinks 1 and True are the same so I have to use 'is' instead =_=
             if result is 1:
                 write2file(

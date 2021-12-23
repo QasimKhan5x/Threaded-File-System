@@ -1,0 +1,24 @@
+/
+├── file1.txt
+└── file2.txt
+
+
+file2.txt opened for writing
+Append text hello to file2.txt committed as transaction.
+file1.txt opened for reading
+/file1.txt [0] 49
+/file2.txt [1] 49
+
+Contents of file1.txt: 
+Append text world to file2.txt committed as transaction.
+file2.txt has been closed and any changes made were saved.
+file1.txt has been closed and any changes made were saved.
+file2.txt opened for reading
+Contents of file2.txt: helloworld
+file2.txt has been closed and any changes made were saved.
+file1.txt opened for reading
+Contents of file1.txt: abcdxyz
+file1.txt has been closed and any changes made were saved.
+/file1.txt [0] 56
+/file2.txt [1] 62
+
