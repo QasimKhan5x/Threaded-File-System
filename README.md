@@ -2,7 +2,7 @@
 Logical file system that implements paging, multithreading, etc.
 
 ## Usage
-Run each cell on[Google Colab](https://colab.research.google.com/drive/1C33cZiobMuFcwgzpCEnobYj0jVThKL7Z?usp=sharing)
+Run each cell on [Google Colab](https://colab.research.google.com/drive/1C33cZiobMuFcwgzpCEnobYj0jVThKL7Z?usp=sharing)
 
 **OR**
 
