@@ -209,5 +209,7 @@ def thread_runner(name, outfile, fs, commands):
             cache[fname] = (file, mode, new_contents)
             write2file(outfile,
                        f'Truncate contents of {fname} to {result} committed as transaction.')
+        # break on encounter of invalid command
+        # not ignoring because other commands may depend on this
         else:
-            continue
+            break
