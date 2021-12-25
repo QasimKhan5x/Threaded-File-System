@@ -165,7 +165,8 @@ def thread_runner(name, outfile, fs, commands):
             result = file.read()
             write2file(outfile, f'Contents of {fname}: {result}')
         elif command.startswith('append'):
-            fname, text = tokens[1:]
+            fname = tokens[1]
+            text = ' '.join(tokens[2:])
             if not assert_file_availability(fname, thread_id, cache, outfile, 'w'):
                 continue
             file, contents = cache[fname]
@@ -175,8 +176,8 @@ def thread_runner(name, outfile, fs, commands):
                 outfile, f'Append text {text} to {fname} committed as transaction.')
         elif command.startswith('write'):
             fname = tokens[1]
-            text = tokens[2]
-            pos = int(tokens[3])
+            text = ' '.join(tokens[2:-1])
+            pos = int(tokens[-1])
             if not assert_file_availability(fname, thread_id, cache, outfile, 'w'):
                 continue
             file, contents = cache[fname]
