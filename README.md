@@ -1,7 +1,12 @@
 # Threaded File System
 Logical file system that implements paging, multithreading, etc.
 
-[Google Colab](https://colab.research.google.com/drive/1C33cZiobMuFcwgzpCEnobYj0jVThKL7Z?usp=sharing)
+## Usage
+Run each cell on[Google Colab](https://colab.research.google.com/drive/1C33cZiobMuFcwgzpCEnobYj0jVThKL7Z?usp=sharing)
+
+**OR**
+
+Run locally: `python main.py`
 
 ### Settings
 - No. of Pages: 10,000
