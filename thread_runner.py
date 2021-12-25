@@ -16,8 +16,11 @@ def thread_runner(name, outfile, fs, commands):
     for command in commands:
         print(name, command)
         tokens = command.split()
+        # empty command
+        if len(tokens) == 0:
+            continue
         # File System and Directory related Commands
-        if command.startswith('mkdir'):
+        if tokens[0] == 'mkdir':
             dirname = tokens[-1]
             result = fs.mkdir(dirname)
             if type(result) != int:
@@ -28,14 +31,14 @@ def thread_runner(name, outfile, fs, commands):
                 else:
                     msg = "No such parent directory exists!"
                 write2file(outfile, msg)
-        elif command.startswith('chdir'):
+        elif tokens[0] == 'chdir':
             dirname = tokens[-1]
             result = fs.chdir(dirname)
             if result == 0:
                 write2file(outfile, "No such directory exists!")
             else:
                 write2file(outfile, fs.pwd())
-        elif command.startswith('mv'):
+        elif tokens[0] == 'mv':
             f1, f2 = tokens[1:]
             result = fs.mv(f1, f2)
             if type(result) == int:
@@ -46,18 +49,18 @@ def thread_runner(name, outfile, fs, commands):
                 write2file(outfile, msg)
             else:
                 print2file(fs, outfile)
-        elif command.startswith('pwd'):
+        elif tokens[0] == 'pwd':
             write2file(outfile, fs.pwd())
-        elif command.startswith('print'):
+        elif tokens[0] == 'print':
             print2file(fs, outfile)
-        elif command.startswith('show_memory_map'):
+        elif tokens[0] == 'show_memory_map':
             showmm2file(fs, outfile)
-        elif command.startswith('save'):
+        elif tokens[0] == 'save':
             dst = tokens[-1]
             fs.save(dst)
             write2file(outfile, f'Filesystem saved at {dst}')
         # File I/O
-        elif command.startswith('create'):
+        elif tokens[0] == 'create':
             fname = tokens[-1]
             result = fs.create(fname)
             if type(result) == int:
@@ -68,14 +71,14 @@ def thread_runner(name, outfile, fs, commands):
                 write2file(outfile, msg)
             else:
                 print2file(fs, outfile)
-        elif command.startswith('delete'):
+        elif tokens[0] == 'delete':
             fname = tokens[-1]
             result = fs.delete(fname)
             if result:
                 print2file(fs, outfile)
             else:
                 write2file(outfile, "No such file exists!")
-        elif command.startswith('open'):
+        elif tokens[0] == 'open':
             fname, mode = tokens[1:]
             if mode == 'r':
                 mode_msg = 'reading'
@@ -112,7 +115,7 @@ def thread_runner(name, outfile, fs, commands):
                 global_file_table[fname] = {thread_id: mode}
             cache[fname] = (file, file.get_contents())
             write2file(outfile, f"{fname} opened for {mode_msg}")
-        elif command.startswith('close'):
+        elif tokens[0] == 'close':
             fname = tokens[-1]
             file, contents = cache.pop(fname, (None, None))
             if file == None:
@@ -146,7 +149,14 @@ def thread_runner(name, outfile, fs, commands):
             else:
                 write2file(
                     outfile, f"{fname} has been closed and any changes made were saved.")
-        elif command.startswith('read_from'):
+        elif tokens[0] == 'read':
+            fname = tokens[1]
+            if not assert_file_availability(fname, thread_id, cache, outfile, 'r'):
+                continue
+            file, _ = cache[fname]
+            result = file.read()
+            write2file(outfile, f'Contents of {fname}: {result}')
+        elif tokens[0] == 'read_from':
             fname = tokens[1]
             start = int(tokens[2])
             size = int(tokens[3])
@@ -155,14 +165,7 @@ def thread_runner(name, outfile, fs, commands):
             file, _ = cache[fname]
             result = file.read_from(start, size)
             write2file(outfile, f'Contents of {fname}: {result}')
-        elif command.startswith('read'):
-            fname = tokens[1]
-            if not assert_file_availability(fname, thread_id, cache, outfile, 'r'):
-                continue
-            file, _ = cache[fname]
-            result = file.read()
-            write2file(outfile, f'Contents of {fname}: {result}')
-        elif command.startswith('append'):
+        elif tokens[0] == 'append':
             fname = tokens[1]
             text = ' '.join(tokens[2:])
             if not assert_file_availability(fname, thread_id, cache, outfile, 'w'):
@@ -172,7 +175,7 @@ def thread_runner(name, outfile, fs, commands):
             cache[fname] = (file, new_contents)
             write2file(
                 outfile, f'Append text {text} to {fname} committed as transaction.')
-        elif command.startswith('write'):
+        elif tokens[0] == 'write_at':
             fname = tokens[1]
             text = ' '.join(tokens[2:-1])
             pos = int(tokens[-1])
@@ -183,7 +186,7 @@ def thread_runner(name, outfile, fs, commands):
             cache[fname] = (file, mode, new_contents)
             write2file(
                 outfile, f'Append text {text} to {fname} committed as transaction.')
-        elif command.startswith('move'):
+        elif tokens[0] == 'move':
             fname = tokens[1]
             if not assert_file_availability(fname, thread_id, cache, outfile, 'w'):
                 continue
@@ -196,7 +199,7 @@ def thread_runner(name, outfile, fs, commands):
             cache[fname] = (file, mode, new_contents)
             write2file(outfile,
                        f'Move text in {fname} from {start} till {start + size} to {target} committed as transaction.')
-        elif command.startswith('tr'):
+        elif tokens[0] == 'tr':
             fname = tokens[1]
             size = int(tokens[2])
             if not assert_file_availability(fname, thread_id, cache, outfile, 'w'):
