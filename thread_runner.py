@@ -97,19 +97,17 @@ def thread_runner(name, outfile, fs, commands):
                 '''
                 More than one thread cannot open a file for writing
                 The current thread must wait
-                An implementation of locking:
+                An implementation of locking via busy wait:
                     If thread wants to write
                     Then check if another thread is writing to this file
                     Wait until that thread closes the file
+                In future, this will be replaced with semaphores.
                 '''
                 if mode == 'w':
-                    print(thread_id, global_file_table)
                     while 'w' in global_file_table[fname].values():
                         pass
                 # add this thread to the list of threads who have opened this file
-                print(thread_id, global_file_table)
                 global_file_table[fname][thread_id] = mode
-                print(thread_id, global_file_table)
             else:
                 global_file_table[fname] = {thread_id: mode}
             cache[fname] = (file, file.get_contents())
